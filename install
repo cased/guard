@@ -8,7 +8,7 @@ output() {
 # check for python3
 if [[ "$(python3 -V)" =~ "Python 3" ]] || [[ "$(python -V)" =~ "Python 3" ]]
 then
-    output "python3 is installed. Proceeding with installation. This may take a few minutes.."
+    output "Python 3 is installed. Proceeding with installation. This may take a few minutes.."
 else
     output "python3 could not be found. Please make sure python3 is installed and on your PATH."
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -28,10 +28,10 @@ PACKAGE_PATH=`python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib
 
 if [[ ! -d $PACKAGE_PATH ]]
 then
-    output "Python package path ($PACKAGE_PATH) cannot be found. You may have installation issues."
-    output "If you encounter issues, try: [sudo] mkdir -p $PACKAGE_PATH"
+    output "Python package path ($PACKAGE_PATH) for python3 cannot be found. You may have installation issues."
+    output "If you do encounter issues, try: [sudo] mkdir -p $PACKAGE_PATH"
     output "If you still have issues, please check https://docs.cased.com/docs/troubleshooting."
 fi
 
-pip install cased 2> /dev/null || pip3 install cased 1> /dev/null
+python3 -m pip install cased 2> /dev/null || python -m pip install cased > /dev/null
 output "Success: Cased Guard is installed. Now run \`cased configure <your-user-token>\`"
