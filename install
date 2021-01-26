@@ -33,5 +33,5 @@ then
     output "If you still have issues, please check https://docs.cased.com/docs/troubleshooting."
 fi
 
-python3 -m pip install cased --upgrade 2> /dev/null || python -m pip install cased --upgrade 1> /dev/null
+python3 -m pip install cased==0.5.* 2> /dev/null || python -m pip install cased==0.5.* 1> /dev/null
 output "Success: Cased Guard is installed. Now run \`cased configure <your-user-token>\`"
