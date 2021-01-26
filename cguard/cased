@@ -28,7 +28,7 @@ from cguard.util import (
 )
 
 
-VERSION = "0.5.2"
+VERSION = "0.5.3"
 
 DEFAULT_URL = "https://api.cased.com"
 
