@@ -1,0 +1,1 @@
+docker build -t guard-docker . && docker run -it guard-docker /bin/bash

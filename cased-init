@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# usage:
+#    eval "$(cased-init -)"
+#
+# When run without with the dash, cased-init will output instructions for
+# installation.
+#
+
+if [[ $1 = "-" ]]; then
+    CGUARD_ROOT="${HOME}/.cguard"
+    mkdir -p "${CGUARD_ROOT}/"shims
+    echo 'export PATH="'${CGUARD_ROOT}'/shims:${PATH}"'
+else
+    echo
+    echo "Initialize cguard automatically by appending the following"
+    echo "to your ~/.bashrc or ~/.zshrc."
+    echo
+    echo "    eval \"\$(cased-init -)\""
+    echo
+fi

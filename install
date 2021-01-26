@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+output() {
+    echo "$1"
+}
+
+# check for python3
+if [[ "$(python3 -V)" =~ "Python 3" ]] || [[ "$(python -V)" =~ "Python 3" ]]
+then
+    output "python3 is installed. Proceeding with installation. This may take a few minutes.."
+else
+    output "python3 could not be found. Please make sure python3 is installed and on your PATH."
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        output "Please install python3 with your package manager and then try again."
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        output "You can install python3 easily with homebrew: brew install python3"
+    elif [[ "$OSTYPE" == "freebsd"* ]]; then
+        output "Please install python3 with your package manager and then try again."
+    else
+        output "Please install python3 with your package manager and then try again."
+    fi
+    exit 1
+fi
+
+# check python directories
+PACKAGE_PATH=`python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'`
+
+if [[ ! -d $PACKAGE_PATH ]]
+then
+    output "Python package path ($PACKAGE_PATH) cannot be found. You may have installation issues."
+    output "If you encounter issues, try: [sudo] mkdir -p $PACKAGE_PATH"
+    output "If you still have issues, please check https://docs.cased.com/docs/troubleshooting."
+fi
+
+pip install cased 2> /dev/null || pip3 install cased 1> /dev/null
+output "Success: Cased Guard is installed. Now run \`cased configure <your-user-token>\`"

@@ -1,0 +1,416 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import shutil
+import json
+import signal
+import sys
+import hashlib
+from os.path import expanduser, exists
+
+from cguard.core import Client
+from cguard.requestor import GuardRequestor
+from cguard.util import (
+    home_dir,
+    cguard_dir,
+    shims_dir,
+    read_settings,
+    log_level,
+    environment,
+    autosync,
+    output,
+    debug,
+)
+
+
+VERSION = "0.2.2"
+
+DEFAULT_URL = "https://api.cased.com"
+
+help_docs = """Usage: cased <command> [<command args>]
+
+Load cased automatically by appending the following to your ~/.bashrc or ~/.zshrc:
+
+    eval "$(cased-init -)"
+
+Common commands:
+    configure <user credentials>                     Configure cased with user credentials
+    sync                                             Sync all shims and settings with remote Cased Guard config
+    url [<remote url>]                               Get/set the remote url for the Cased server (default: http://localhost:3000)
+    verify                                           Run diagnostics on cased, confirming things are setup correctly
+    version                                          Output the cased version
+
+Internal commands:
+    local-shims                                      List all local cased shims
+    remote-shims                                     List all remote shims
+"""
+
+
+shim_text = """#!/bin/sh
+
+APP_TOKEN={0} DENY_IF_UNREACHABLE={1} cased run {2} "$@"
+"""
+
+
+def help():
+    print(help_docs)
+    exit(0)
+
+
+#### HELPER FUNCTIONS ########################
+
+
+def _make_shim(program, token, program_path, deny_if_unreachable):
+    deny_state = "0"
+    if deny_if_unreachable:
+        deny_state = "1"
+
+    text = shim_text.format(token, deny_state, program_path)
+    filepath = shims_dir() + "/" + program
+
+    with open(filepath, "w+") as text_file:
+        text_file.write(text)
+
+    os.chmod(filepath, 509)
+
+
+def _check_credentials():
+    filepath = cguard_dir() + "/" + "credentials"
+    return exists(filepath)
+
+
+def _check_settings():
+    filepath = cguard_dir() + "/" + "settings"
+    return exists(filepath)
+
+
+def _confirm_credentials():
+    if not _check_credentials():
+        output(
+            "Please configure your user token. To get your token, visit https://api.cased.com/guard. Then run `cased configure <your-token>`."
+        )
+        exit(1)
+
+
+def _get_credentials():
+    _confirm_credentials()
+    filepath = cguard_dir() + "/" + "credentials"
+    with open(filepath, "r") as text_file:
+        creds = text_file.read()
+
+    return creds
+
+
+#### COMMON COMMANDS ########################
+
+
+def configure(user_token):
+
+    # make necessary directories just to be sure
+    cguard_d = cguard_dir()
+    shims_d = shims_dir()
+
+    if not os.path.exists(cguard_d):
+        os.makedirs(cguard_d)
+        output("Created guard directory")
+
+    if not os.path.exists(shims_d):
+        os.makedirs(shims_d)
+        output("Created guard shims directory")
+
+    filepath = cguard_dir() + "/credentials"
+    with open(filepath, "w+") as text_file:
+        text_file.write(user_token)
+
+    output("Credentials set and stored.")
+    sync()
+
+
+def get_remote_url():
+    filepath = cguard_dir() + "/remote"
+    if not exists(filepath):
+        output(
+            "Custom URL has not been set. Guard will use the default url: {}".format(
+                DEFAULT_URL
+            )
+        )
+        exit(0)
+
+    with open(filepath, "r") as text_file:
+        url = text_file.read()
+
+    print(url)
+
+
+def set_remote_url(remote_url):
+    filepath = cguard_dir() + "/remote"
+
+    if remote_url == "--reset":
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            output("URL has been reset. Default will be used.")
+            exit(0)
+        else:
+            output("URL has not been set.")
+            exit(0)
+
+    with open(filepath, "w+") as text_file:
+        text_file.write(remote_url)
+
+    output("Remote url set.")
+    get_remote_url()
+
+
+def sync(do_output=True):
+    _confirm_credentials()
+    output("Syncing with latest Guard server configuration.")
+
+    user_token = _get_credentials()
+    requestor = GuardRequestor()
+
+    filepath = cguard_dir() + "/settings"
+    settings = {
+        "poll": 1,
+        "log_level": "info",
+        "environment": "local",
+        "autosync": True,
+    }
+
+    with open(filepath, "w+") as text_file:
+        json.dump(settings, text_file)
+
+    # Get applications
+    res = requestor.get_applications(user_token, environment())
+
+    if log_level() == "debug":
+        debug(res.text)
+
+    apps = res.json()
+
+    # Remove all existing shims
+    target = shims_dir()
+    shims = sorted(os.listdir(target))
+
+    # get the count of shims
+    local_shims_count = len(shims)
+    remote_shims_count = len(apps)  # todo: compare names later
+
+    for shim in shims:
+        uninstall_program(shim)
+
+    # Install all apps
+    for app in apps:
+        program = app.get("program")
+        app_id = app.get("id")
+        settings = app.get("settings")
+
+        deny_if_unreachable = settings.get(
+            "deny_on_unreachable"
+        )  # todo: change name server-side
+
+        try:
+            install_program(program, app_id, deny_if_unreachable, do_output)
+        except:
+            if do_output:
+                output("Failed to setup program: {}".format(program))
+
+    if apps:
+        if do_output and (local_shims_count != remote_shims_count):
+            output(
+                """New shims installed and updated. Please load a new shell for
+           changes to take effect, and make sure cased-init has been eval'd."""
+            )
+    else:
+        output("No guarded applications are configured on the Cased Guard server.")
+
+
+def verify():
+    shim_on_path = False
+    cguard_on_path = False
+    cguard_init_on_path = False
+    credentials_set = False
+    settings_set = False
+
+    path = os.environ.get("PATH")
+
+    # confirm that the shims directory is on the PATH
+    if shims_dir() in path:
+        shim_on_path = True
+
+    # confirm cguard is on the PATH
+    cguard_filepath = shutil.which("cased")
+    if cguard_filepath:
+        cguard_on_path = True
+
+    # confirm cguard-init is on the PATH
+    cguard_init_filepath = shutil.which("cased-init")
+    if cguard_init_filepath:
+        cguard_init_on_path = True
+
+    # confirm credentials are set
+    if _check_credentials():
+        credentials_set = True
+
+    # confirm general settings
+    if _check_settings():
+        settings_set = True
+
+    verifications = [
+        {"cased on PATH                  ": cguard_on_path},
+        {"cased-init on PATH             ": cguard_init_on_path},
+        {"general settings are configured": settings_set},
+        {"shim directory on PATH         ": shim_on_path},
+        {"user credentials are configured": credentials_set},
+    ]
+
+    print("")
+    for verification in verifications:
+        for v, s in verification.items():
+            if s == True:
+                print("✅ {}    verified".format(v))
+            else:
+                print("❌ {}    not verified".format(v))
+    print("")
+
+
+#### INTERNAL COMMANDS ########################
+
+
+def install_program(program, token, deny_if_unreachable, do_output=False):
+    shim_path = shutil.which(program)
+    if not shim_path:
+        if do_output:
+            output(
+                "[error] The given program ({}) was not found on your PATH. Please specify the path to the program.".format(
+                    program
+                )
+            )
+
+    if shims_dir() in shim_path:
+        output(
+            "Shim already exists."
+        )  # todo: we can overwrite the existing, but it will require an explicit path (`which` won't work anymore since we have the shim!)
+
+    details = "Installed Cased Guard shim for {}".format(program)
+
+    _make_shim(program, token, shim_path, deny_if_unreachable)
+    if do_output:
+        output(details)
+
+
+def list_local_shims():
+    target = shims_dir()
+    shims = sorted(os.listdir(target))
+    for shim in shims:
+        print(shim)
+
+
+def list_remote_shims():
+    _confirm_credentials()
+
+    user_token = _get_credentials()
+    requestor = GuardRequestor()
+    res = requestor.get_applications(user_token, environment())
+    apps = res.json()
+
+    for app in apps:
+        print(app.get("name"))
+
+
+def run(program, program_args=[]):
+    _confirm_credentials()
+
+    if autosync() == True:
+        # Always run sync to keep guard up to to date, but run silently.
+        sync(False)
+
+    app_token = os.environ.get("APP_TOKEN")
+    deny_if_unreachable = os.environ.get("DENY_IF_UNREACHABLE")
+
+    user_token = _get_credentials()
+    program_args = " ".join(program_args)
+    Client(program).execute(program_args, app_token, deny_if_unreachable, user_token)
+
+
+def uninstall_program(program):
+    target = shims_dir() + "/" + program
+    if os.path.exists(target):
+        os.remove(target)
+    else:
+        print("There is no shim for the program: {}".format(program))
+        return
+
+
+### CASED GUARD CLI
+args = sys.argv
+if len(args) == 1:
+    help()
+
+command = sys.argv[1]
+
+if command == "configure":
+    if not len(args) > 2:
+        help()
+
+    token = args[2]
+    configure(token)
+    exit(0)
+
+if command == "guard":
+    path = None
+    if not len(args) > 3:
+        help()
+
+    program = args[2]
+    app_id = args[3]
+
+    if len(args) > 4:
+        path = args[3]
+
+    install_program(program, app_id, True, path)
+
+
+elif command == "local-shims":
+    list_local_shims()
+
+
+elif command == "remote-shims":
+    list_remote_shims()
+
+
+elif command == "run":
+    if not len(args) > 2:
+        help()
+
+    program = args[2]
+    run(program, args[3:])
+
+elif command == "sync":
+    sync()
+
+elif command == "uninstall":
+    if not len(args) > 2:
+        help()
+
+    program = args[2]
+    uninstall_program(program)
+
+elif command == "url":
+    if len(args) > 2:
+        url = args[2]
+        set_remote_url(url)
+    else:
+        get_remote_url()
+
+    exit(0)
+
+elif command == "verify":
+    verify()
+
+elif command == "version":
+    print(VERSION)
+
+else:
+    help()
+    exit(0)
