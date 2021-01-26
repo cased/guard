@@ -25,7 +25,6 @@ setup(
         "pytest >= 4.0c0",
         "pytest-mock",
         "pytest-xdist",
-        "flask",
         "yaspin",
     ],
     project_urls={
