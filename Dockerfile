@@ -3,7 +3,7 @@ FROM python:3
 WORKDIR /usr/src/app
 
 COPY . ./
-RUN ./install
+RUN ./local-install
 
 ENV TERRAFORM_VERSION 0.12.7
 ENV PATH="/root/.cguard/shims:${PATH}"

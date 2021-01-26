@@ -37,6 +37,7 @@ Load cased automatically by appending the following to your ~/.bashrc or ~/.zshr
 Common commands:
     configure <user credentials>                     Configure cased with user credentials
     sync                                             Sync all shims and settings with remote Cased Guard config
+    update                                           Update the Cased Guard client with the latest version
     url [<remote url>]                               Get/set the remote url for the Cased server (default: http://localhost:3000)
     verify                                           Run diagnostics on cased, confirming things are setup correctly
     version                                          Output the cased version
@@ -225,6 +226,17 @@ def sync(do_output=True):
         output("No guarded applications are configured on the Cased Guard server.")
 
 
+def update():
+    status = os.system(
+        '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cased/guard-install/main/install.sh)"'
+    )
+
+    if status != 0:
+        print("Cased Guard failed to update. Please update manually.")
+    else:
+        print("Cased Guard has been updated")
+
+
 def verify():
     shim_on_path = False
     cguard_on_path = False
@@ -388,6 +400,10 @@ elif command == "run":
 
 elif command == "sync":
     sync()
+
+
+elif command == "update":
+    update()
 
 elif command == "uninstall":
     if not len(args) > 2:
