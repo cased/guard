@@ -5,9 +5,13 @@ import os
 import shutil
 import json
 import signal
+import requests
 import sys
 import hashlib
 from os.path import expanduser, exists
+
+from pkg_resources import parse_version
+from packaging import version
 
 from cguard.core import Client
 from cguard.requestor import GuardRequestor
@@ -24,7 +28,7 @@ from cguard.util import (
 )
 
 
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 
 DEFAULT_URL = "https://api.cased.com"
 
@@ -103,6 +107,24 @@ def _get_credentials():
     return creds
 
 
+def _check_for_new_version():
+    try:
+        url = "https://pypi.org/pypi/cased/json"
+        versions = requests.get(url, timeout=20).json()
+        releases = versions.get("releases")
+        version_numbers = sorted(releases, key=parse_version, reverse=True)
+        latest_version = version_numbers[0]
+
+        if version.parse(latest_version) > version.parse(VERSION):
+            output(
+                "There is a newer version of Cased Guard available. Please update your client by running: `cased update`"
+            )
+        else:
+            pass
+    except:
+        pass
+
+
 #### COMMON COMMANDS ########################
 
 
@@ -166,6 +188,7 @@ def set_remote_url(remote_url):
 def sync(do_output=True):
     _confirm_credentials()
     output("Syncing with latest Guard server configuration.")
+    _check_for_new_version()
 
     user_token = _get_credentials()
     requestor = GuardRequestor()
@@ -183,6 +206,9 @@ def sync(do_output=True):
 
     # Get applications
     res = requestor.get_applications(user_token, environment())
+    if res.status_code != 200:
+        output("Error requesting current applications, unable to sync.")
+        exit(1)
 
     if log_level() == "debug":
         debug(res.text)
@@ -400,7 +426,6 @@ elif command == "run":
 
 elif command == "sync":
     sync()
-
 
 elif command == "update":
     update()
