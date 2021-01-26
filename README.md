@@ -12,23 +12,29 @@ It handles the hard parts of configuring these shims, and keeps itself up-to-dat
 with changes and additions to your remote Cased Guard configuration.
 
 
-Requirements & Setup
+Requirements & Install
 -----------------------
 
-The only requirement to run `cased` is Python 3.5 or better. Additionally, if you
-use our automated `install.sh` script, you will need `git`.
+The only requirement to run `cased` is Python 3.5 or better.
 
-First, install `cased` itself:
+Install the `cased` program system-wide with pip:
 
 ```
-pip3 install cased
+python3 -m pip install cased
 ```
 
-Or clone this repo and run:
+Note that this create two programs, `cased` and `cased-init`, which will then be
+available on your `PATH`.
+
+Alternatively, you can clone this repo and run:
 
 ```
 ./install
 ```
+
+
+Quick Setup
+-----------------------
 
 Now _initialize_ the tool. You need to make sure `cased-init` (a single-purpose `init` script)
 runs every time a shell starts. To do that, just add this to your `~/.bashrc` or `~/.zshrc`:
@@ -85,7 +91,6 @@ Internal commands
 ------------------
 
 Although not needed for regular use, `cased` does expose some low-level plumbing commands:
-
 
 **List available local shims**
 
