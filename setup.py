@@ -6,7 +6,7 @@ from setuptools.command.test import test as TestCommand
 
 setup(
     name="cased",
-    version="0.5.3",
+    version="0.5.4",
     description="Cased Guard adds security and visibility features to the command line tools you and your team love.",
     long_description="Cased Guard adds security and visibility features to the command line tools you and your team love. https://cased.com/guard",
     author="Cased",
