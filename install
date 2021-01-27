@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 output() {
     echo "[cased-install] $1"
@@ -28,9 +27,17 @@ else
     exit 1
 fi
 
+if [[ "$($PYTHON -m pip -V)" =~ "python 3" ]]
+then
+    output "Pip is installed. Proceeding with installation..."
+else
+    output "Pip is not installed. Please install with \`curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && $PYTHON get-pip.py\` or via your package manager."
+    exit 1
+fi
+
 # check python directories
 PACKAGE_PATH=`$PYTHON -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'`
-echo "Package path at $PACKAGE_PATH"
+output "Package path at $PACKAGE_PATH"
 
 if [[ ! -d $PACKAGE_PATH ]]
 then
@@ -39,5 +46,7 @@ then
     output "If you still have issues, please check https://docs.cased.com/docs/troubleshooting."
 fi
 
+set -e
+
 python3 -m pip install cased==0.5.* --upgrade 2> /dev/null || python -m pip install cased==0.5.* --upgrade 1> /dev/null
-output "Success: Cased Guard is installed. Now run \`cased configure <your-user-token>\`"
+output "Success: Cased Guard is installed. Run \`cased configure <your-user-token>\` if this is your first install. Check https://docs.cased.com/docs/getting-started-with-guard for more."
