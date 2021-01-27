@@ -37,7 +37,7 @@ class Client:
 
         if status_code == 200:
             # approved: either the session is active or auto-approval is on
-            output("Running under Cased Guard.")
+            output("Logging action to Cased audit trail.")
 
         elif status_code == 201:
             # approval required
