@@ -1,52 +1,63 @@
 #!/bin/bash
 
-output() {
-    echo "[cased-install] $1"
+
+red=$'\e[1;31m'
+grn=$'\e[1;32m'
+end=$'\e[0m'
+
+success () {
+    echo -e "$grn[cased-install] $1$end"
+}
+
+fail() {
+    echo -e "$red[cased-install] $1$end"
+
 }
 
 # check for python3
 if [[ "$(python3 -V)" =~ "Python 3" ]]
 then
     PYTHON=python3
-    output "Python 3 is installed as python3. Proceeding with installation. This may take a few minutes.."
+    success "Python 3 is installed as python3. Proceeding with installation. This may take a few minutes.."
 elif [[ "$(python -V)" =~ "Python 3" ]]
 then
     PYTHON=python
-    output "Python 3 is installed as python. Proceeding with installation. This may take a few minutes.."
+    success "Python 3 is installed as python. Proceeding with installation. This may take a few minutes.."
 else
-    output "python3 could not be found. Please make sure python3 is installed and on your PATH."
+    fail "python3 could not be found. Please make sure python3 is installed and on your PATH."
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        output "Please install python3 with your package manager and then try again."
+        fail "Please install python3 with your package manager and then try again."
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        output "You can install python3 easily with homebrew: brew install python3"
+        fail "You can install python3 easily with homebrew: brew install python3"
     elif [[ "$OSTYPE" == "freebsd"* ]]; then
-        output "Please install python3 with your package manager and then try again."
+        fail "Please install python3 with your package manager and then try again."
     else
-        output "Please install python3 with your package manager and then try again."
+        fail "Please install python3 with your package manager and then try again."
     fi
     exit 1
 fi
 
 if [[ "$($PYTHON -m pip -V)" =~ "python 3" ]]
 then
-    output "Pip is installed. Proceeding with installation..."
+    success "Pip is installed. Proceeding with installation..."
 else
-    output "Pip is not installed. Please install with \`curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && $PYTHON get-pip.py\` or via your package manager."
+    fail "Pip is not installed. Please install with \`curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && $PYTHON get-pip.py\` or via your package manager."
     exit 1
 fi
 
 # check python directories
 PACKAGE_PATH=`$PYTHON -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'`
-output "Package path at $PACKAGE_PATH"
+success "Package path at $PACKAGE_PATH"
 
 if [[ ! -d $PACKAGE_PATH ]]
 then
-    output "Python package path ($PACKAGE_PATH) for python3 cannot be found. You may have installation issues."
-    output "If you do encounter issues, try: [sudo] mkdir -p $PACKAGE_PATH"
-    output "If you still have issues, please check https://docs.cased.com/docs/troubleshooting."
+    fail "Python package path ($PACKAGE_PATH) for python3 cannot be found. You may have installation issues."
+    fail "If you do encounter issues, try: [sudo] mkdir -p $PACKAGE_PATH"
+    fail "If you still have issues, please check https://docs.cased.com/docs/troubleshooting."
 fi
 
 set -e
 
 python3 -m pip install cased==0.5.* --upgrade 2> /dev/null || python -m pip install cased==0.5.* --upgrade 1> /dev/null
-output "Success: Cased Guard is installed. Run \`cased configure <your-user-token>\` if this is your first install. Check https://docs.cased.com/docs/getting-started-with-guard for more."
+success "Success: Cased Guard is installed. Run \`cased configure <your-user-token>\` if this is your first install."
+success "Check https://docs.cased.com/docs/getting-started-with-guard for more."
