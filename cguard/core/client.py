@@ -36,7 +36,15 @@ class Client:
         body = res.json()
 
         if status_code == 200:
-            # approved: either the session is active or auto-approval is on
+            # approved, let's check why it's approved
+            approval_reason = body.get("approval_reason")
+            if approval_reason == "auto":
+                output("Action approved automatically.")
+            elif approval_reason == "allowed_subcommand":
+                output("Approval is not required for this action.")
+            else:
+                pass
+
             output("Logging action to Cased audit trail.")
 
         elif status_code == 201:
