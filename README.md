@@ -15,9 +15,16 @@ with changes and additions to your remote Cased Guard configuration.
 Requirements & Install
 -----------------------
 
-The only requirement to run `cased` is Python 3.5 or better.
+The only requirement to run `cased` is Python 3.5 or better. There are several easy ways to install
+the program.
 
-Install the `cased` program system-wide with pip:
+You can install using Homebrew via our [tap](https://github.com/cased/homebrew-tap):
+
+```
+brew install cased/tap/cased
+```
+
+You can install the `cased` program system-wide (or into virtualenv) with pip:
 
 ```
 python3 -m pip install cased
