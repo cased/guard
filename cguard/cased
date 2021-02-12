@@ -3,6 +3,7 @@
 import sys
 import os
 import shutil
+import time
 import json
 import signal
 import requests
@@ -12,6 +13,7 @@ from os.path import expanduser, exists
 
 from pkg_resources import parse_version
 from packaging import version
+
 
 from cguard.core import Client
 from cguard.requestor import GuardRequestor
@@ -39,7 +41,7 @@ Load cased automatically by appending the following to your ~/.bashrc or ~/.zshr
     eval "$(cased-init -)"
 
 Common commands:
-    configure <user credentials>                     Configure cased with user credentials
+    configure [<user credentials>]                   Configure cased with user credentials. Run without an arg for web connect.
     sync                                             Sync all shims and settings with remote Cased Guard config
     update                                           Update the Cased Guard client with the latest version
     url [<remote url>]                               Get/set the remote url for the Cased server (default: http://localhost:3000)
@@ -125,11 +127,7 @@ def _check_for_new_version():
         pass
 
 
-#### COMMON COMMANDS ########################
-
-
-def configure(user_token):
-
+def _setup_directories():
     # make necessary directories just to be sure
     cguard_d = cguard_dir()
     shims_d = shims_dir()
@@ -141,6 +139,59 @@ def configure(user_token):
     if not os.path.exists(shims_d):
         os.makedirs(shims_d)
         output("Created guard shims directory")
+
+
+#### COMMON COMMANDS ########################
+
+
+def configure():
+    _setup_directories()
+
+    filepath = cguard_dir() + "/credentials"
+
+    # get user token
+    requestor = GuardRequestor()
+    res = requestor.identify_user()
+    if res.status_code == 201:
+        data = res.json()
+        code = data.get("code")
+        url = data.get("url")
+
+        # Wait for 200, then timeout
+        wait_text = """To continue, confirm your Cased account or sign up. Please visit:
+{0}""".format(
+            url
+        )
+
+        print(wait_text)
+
+        while True:
+            # poll the API for confirmation of connection
+            res = requestor.check_for_identification(code)
+            if res.status_code == 200:
+                msg = "✅ Connected with Cased."
+                output(msg)
+
+                data = res.json()
+                user_token = data.get("user").get("id")
+
+                with open(filepath, "w+") as text_file:
+                    text_file.write(user_token)
+                    output("Credentials set and stored.")
+
+                time.sleep(2)
+                sync()
+
+                break
+
+            time.sleep(2)
+    else:
+        output("Failed to configure (bad response to identify user")
+        exit(1)
+
+
+def configure_with_token(user_token):
+    _setup_directories()
 
     filepath = cguard_dir() + "/credentials"
     with open(filepath, "w+") as text_file:
@@ -207,7 +258,11 @@ def sync(do_output=True):
     # Get applications
     res = requestor.get_applications(user_token, environment())
     if res.status_code != 200:
-        output("Error requesting current applications, unable to sync.")
+        output(
+            "Error requesting current applications, unable to sync. Error: {}".format(
+                str(res.status_code)
+            )
+        )
         exit(1)
 
     if log_level() == "debug":
@@ -389,10 +444,11 @@ command = sys.argv[1]
 
 if command == "configure":
     if not len(args) > 2:
-        help()
+        configure()
+        exit(0)
 
     token = args[2]
-    configure(token)
+    configure_with_token(token)
     exit(0)
 
 if command == "guard":

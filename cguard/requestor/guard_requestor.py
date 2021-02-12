@@ -130,3 +130,17 @@ class GuardRequestor:
 
         res = self.client.make_request("get", url)
         return res
+
+    def identify_user(self):
+        url = self._base_url() + "/applications/users/identify"
+
+        res = self.client.make_request("post", url)
+        return res
+
+    def check_for_identification(self, identification_request_id):
+        url = self._base_url() + "/applications/users/identify/{}".format(
+            identification_request_id
+        )
+
+        res = self.client.make_request("get", url)
+        return res
