@@ -16,11 +16,14 @@ def shims_dir():
 
 
 def read_settings():
-    filepath = cguard_dir() + "/" + "settings"
-    with open(filepath, "r") as json_file:
-        settings = json.load(json_file)
+    try:
+        filepath = cguard_dir() + "/" + "settings"
+        with open(filepath, "r") as json_file:
+            settings = json.load(json_file)
 
-    return settings
+        return settings
+    except:
+        return {}
 
 
 def poll_interval():
