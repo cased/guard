@@ -309,13 +309,15 @@ def sync(do_output=True):
 
 def update():
     status = os.system(
-        '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/cased/guard-install/main/install.sh)"'
-    )
+        "brew upgrade cased/tap/cased"
+    )  # todo: make the manner of the update option more configurable
 
     if status != 0:
-        print("Cased Guard failed to update. Please update manually.")
+        print(
+            "Cased Guard failed to update automatically with Homebrew. Please update manually."
+        )
     else:
-        print("Cased Guard has been updated")
+        print("Cased Guard has been updated.")
 
 
 def verify():
