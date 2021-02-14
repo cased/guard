@@ -94,9 +94,7 @@ def _check_settings():
 
 def _confirm_credentials():
     if not _check_credentials():
-        output(
-            "Please configure your user token. To get your token, visit https://api.cased.com/guard. Then run `cased configure <your-token>`."
-        )
+        output("Please configure your user token: run `cased configure`.")
         exit(1)
 
 
@@ -199,6 +197,13 @@ def configure_with_token(user_token):
 
     output("Credentials set and stored.")
     sync()
+
+
+def reset_configure():
+    filepath = cguard_dir() + "/credentials"
+    if os.path.exists(filepath):
+        os.remove(filepath)
+        output("Configuration has been reset.")
 
 
 def get_remote_url():
@@ -449,7 +454,13 @@ if command == "configure":
         configure()
         exit(0)
 
-    token = args[2]
+    arg2 = args[2]
+    if arg2 == "--reset":
+        reset_configure()
+        exit(0)
+    else:
+        token = arg2
+
     configure_with_token(token)
     exit(0)
 

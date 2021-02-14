@@ -1,1 +1,8 @@
-docker build -t guard-docker . && docker run -it guard-docker /bin/bash
+#/bin/bash
+
+if [[ $1 == "--build" ]]
+then
+	docker build -t guard-docker .
+else
+	docker build -t guard-docker . && docker run -it guard-docker /bin/bash
+fi
