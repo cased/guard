@@ -24,13 +24,13 @@ You can install using Homebrew via our [tap](https://github.com/cased/homebrew-t
 brew install cased/tap/cased
 ```
 
-You can install the `cased` program system-wide (or into virtualenv) with pip:
+You can install the `cased` program system-wide (or into a `virtualenv`) with pip:
 
 ```
 python3 -m pip install cased
 ```
 
-Note that this create two programs, `cased` and `cased-init`, which will then be
+Note that this creates two programs, `cased` and `cased-init`, which will then be
 available on your `PATH`.
 
 Alternatively, you can clone this repo and run:
@@ -44,20 +44,29 @@ Quick Setup
 -----------------------
 
 Now _initialize_ the tool. You need to make sure `cased-init` (a single-purpose `init` script)
-runs every time a shell starts. To do that, just add this to your `~/.bashrc` or `~/.zshrc`:
+runs every time a shell starts. To do that, just add this line to your `~/.bashrc`, `~/.zshrc`,
+or similar file:
 
 ```
 eval "$(cased-init -)"
 ```
 
-Next configure Cased Guard via your unique user token. This will also sync your local client
+Next, configure Cased Guard with your unique user token. This will also sync your local client
 with your Cased Guard remote settings.
 
 ```
 cased configure <your-user-token>
 ```
 
-And lastly, start a new shell.
+You can also just run:
+
+```
+cased configure
+```
+
+and follow the web-based connect instructions.
+
+Lastly, start a new shell for the environment changes to take effect.
 
 You can confirm the entire installation with:
 
@@ -77,8 +86,12 @@ your Cased Guard server will run under `cased`.
 
 We recommend you periodically (and automatically)
 run `cased sync` to keep your local guarded programs up-to-date
-with your remote configuration. After you run `cased sync`, you
-must start a new shell.
+with your remote configuration. However, even if  you don't do this,
+the `cased` client will still check its remote server for
+updates whenever it is invoked.
+
+Configuration
+---------------
 
 The Cased Guard remote server defaults to `api.cased.com`. To change that
 url, just set with:
@@ -97,7 +110,8 @@ cased url --reset
 Internal commands
 ------------------
 
-Although not needed for regular use, `cased` does expose some low-level plumbing commands:
+Although not needed for regular use, `cased` does expose some low-level
+plumbing commands:
 
 **List available local shims**
 
@@ -118,6 +132,13 @@ cased remote-shims
 Uninstalling
 ---------------------
 
-Since the Cased Guard client is so lightweight, you can simply remove the ` eval "$(cased-init -)"` from your shell startup script, and open a new shell. Programs will no longer be guarded.
+Since the Cased Guard client is so lightweight, you can simply
+remove the ` eval "$(cased-init -)"` from your shell startup script,
+and open a new shell. Programs will no longer be guarded.
 
-To _completely_ remove a Cased Guard install, you can `rm` the `~/.cguard/` directory, where the client stores data, although this isn't strictly necessary. You can also remove the `cased` and `cased-init` programs, which are likely in `/usr/local/bin/` or a similar location (try `which cased` and `which cased-init` to find their location.)
+To _completely_ remove a Cased Guard install, you can `rm`
+the `~/.cguard/` directory, where the client stores data, although
+this isn't strictly necessary. You can also remove the
+`cased` and `cased-init` programs, which are likely
+in `/usr/local/bin/` or a similar location (try `which cased`
+and `which cased-init` to find their location.)
