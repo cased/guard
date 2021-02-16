@@ -304,10 +304,7 @@ def sync(do_output=True):
 
     if apps:
         if do_output and (local_shims_count != remote_shims_count):
-            output(
-                """New shims installed and updated. Please load a new shell for
-           changes to take effect, and make sure cased-init has been eval'd."""
-            )
+            output("New shims installed and updated.")
     else:
         output("No guarded applications are configured on the Cased Guard server.")
 

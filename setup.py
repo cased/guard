@@ -25,7 +25,6 @@ setup(
         "pytest >= 4.0c0",
         "pytest-mock",
         "pytest-xdist",
-        "yaspin",
     ],
     project_urls={
         "Bug Tracker": "https://github.com/cased/guard/issues",
