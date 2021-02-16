@@ -20,6 +20,8 @@ setup(
     python_requires=">3.5",
     install_requires=[
         "requests",
+    ],
+    tests_require=[
         "responses",
         "mock",
         "pytest >= 4.0c0",
