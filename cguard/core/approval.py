@@ -4,11 +4,10 @@ import time
 import sys
 import signal
 from random import randint
-from yaspin import yaspin
 
 from cguard.access_manager import CasedGuardAccessManager
 from cguard.requestor import GuardRequestor
-from cguard.util import read_settings, poll_interval
+from cguard.util import read_settings, poll_interval, output
 
 
 class Approval:
@@ -28,21 +27,22 @@ class Approval:
         signal.signal(signal.SIGINT, signal_handler)
 
         wait_text = waiting_message + " (id: {})".format(session_id)
-        with yaspin(text=wait_text, color="white") as spinner:
-            while True:
-                # poll the API for access granted
-                state = self.access_manager.check_access(
-                    app_name, app_token, session_id, user_token
-                )
-                if state == "approved":
-                    msg = "✅ ACCESS APPROVED"
-                    spinner.ok(msg)
-                    break
-                elif state == "denied":
-                    spinner.fail("🛑 ACCESS DENIED")
-                    exit(1)
+        output(wait_text)
+        while True:
+            # poll the API for access granted
+            state = self.access_manager.check_access(
+                app_name, app_token, session_id, user_token
+            )
+            if state == "approved":
+                msg = "✅ ACCESS APPROVED"
+                output(msg)
+                break
+            elif state == "denied":
+                msg = "🛑 ACCESS DENIED"
+                output(msg)
+                exit(1)
 
-                interval = poll_interval()
-                time.sleep(interval)
+            interval = poll_interval()
+            time.sleep(interval)
 
         return True
