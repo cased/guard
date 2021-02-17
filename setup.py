@@ -7,11 +7,11 @@ from setuptools.command.test import test as TestCommand
 setup(
     name="cased",
     version="0.5.9",
-    description="Cased Guard adds security and visibility features to the command line tools you and your team love.",
-    long_description="Cased Guard adds security and visibility features to the command line tools you and your team love. https://cased.com/guard",
+    description="Cased CLI adds security and visibility features to the command line tools you and your team love.",
+    long_description="Cased CLI adds security and visibility features to the command line tools you and your team love. https://cased.com/guard",
     author="Cased",
     author_email="support@cased.com",
-    url="https://github.com/cased/guard-client",
+    url="https://github.com/cased/cli",
     license="BSL 1.1",
     keywords="cased api",
     packages=find_packages(exclude=["tests", "tests.*"]),
@@ -29,8 +29,8 @@ setup(
         "pytest-xdist",
     ],
     project_urls={
-        "Bug Tracker": "https://github.com/cased/guard/issues",
-        "Documentation": "https://docs.cased.com/guard",
-        "Source Code": "https://github.com/cased/guard",
+        "Bug Tracker": "https://github.com/cased/cli/issues",
+        "Documentation": "https://docs.cased.com/cli",
+        "Source Code": "https://github.com/cased/cli",
     },
 )
