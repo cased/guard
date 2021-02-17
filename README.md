@@ -1,7 +1,7 @@
 `cased`
 ==========================================
 
-**Guard your team's critical command line infrastructure with Cased Guard**
+**Guard your team's critical command line infrastructure with Cased**
 
 Overview
 -----------
