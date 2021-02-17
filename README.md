@@ -1,15 +1,15 @@
-`cased`: Cased Guard on the Command Line
+`cased`
 ==========================================
 
-**Guard your team's critical command line infrastructure with Cased Guard**
+**Guard your team's critical command line infrastructure with Cased**
 
 Overview
 -----------
 
-`cased` is the command-line tool for configuring and running [Cased Guard](https://cased.com/guard).
+`cased` is the command-line tool for configuring and running [Cased CLI](https://cased.com/guard).
 It works via simple _shims_ that wrap your other command-line programs.
 It handles the hard parts of configuring these shims, and keeps itself up-to-date
-with changes and additions to your remote Cased Guard configuration.
+with changes and additions to your remote Cased configuration.
 
 
 Requirements & Install
@@ -51,8 +51,8 @@ or similar file:
 eval "$(cased-init -)"
 ```
 
-Next, configure Cased Guard with your unique user token. This will also sync your local client
-with your Cased Guard remote settings.
+Next, configure Cased with your unique user token. This will also sync your local client
+with your Cased remote settings.
 
 ```
 cased configure <your-user-token>
@@ -82,7 +82,7 @@ Usage
 
 After you've installed `cased` and configured it, you're all set.
 Just run your programs as usual, and any that have been configured by
-your Cased Guard server will run under `cased`.
+your Cased server will run under `cased`.
 
 We recommend you periodically (and automatically)
 run `cased sync` to keep your local guarded programs up-to-date
@@ -93,7 +93,7 @@ updates whenever it is invoked.
 Configuration
 ---------------
 
-The Cased Guard remote server defaults to `api.cased.com`. To change that
+The Cased remote server defaults to `api.cased.com`. To change that
 url, just set with:
 
 ```
@@ -132,11 +132,11 @@ cased remote-shims
 Uninstalling
 ---------------------
 
-Since the Cased Guard client is so lightweight, you can simply
+Since the Cased client is so lightweight, you can simply
 remove the ` eval "$(cased-init -)"` from your shell startup script,
 and open a new shell. Programs will no longer be guarded.
 
-To _completely_ remove a Cased Guard install, you can `rm`
+To _completely_ remove a Cased install, you can `rm`
 the `~/.cguard/` directory, where the client stores data, although
 this isn't strictly necessary. You can also remove the
 `cased` and `cased-init` programs, which are likely
