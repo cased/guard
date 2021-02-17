@@ -41,7 +41,7 @@ class TestAPIRequestor(object):
 
             cguard.requestor.HTTPClient.make_request.assert_called_with(
                 "post",
-                "https://api.cased.com/guard/sessions?user_token=abcdefg",
+                "https://api.cased.com/cli/sessions?user_token=abcdefg",
                 data={
                     "guard_application_id": "test-app",
                     "metadata": {"hostname": "hostname"},
@@ -66,7 +66,7 @@ class TestAPIRequestor(object):
 
             cguard.requestor.HTTPClient.make_request.assert_called_with(
                 "post",
-                "https://api.cased.com/guard/sessions?user_token=abcdefg",
+                "https://api.cased.com/cli/sessions?user_token=abcdefg",
                 data={
                     "guard_application_id": "test-app",
                     "metadata": {"hostname": "hostname"},
@@ -95,7 +95,7 @@ class TestAPIRequestor(object):
 
             cguard.requestor.HTTPClient.make_request.assert_called_with(
                 "get",
-                "https://api.cased.com/guard/sessions/session_1234?user_token=user_12345",
+                "https://api.cased.com/cli/sessions/session_1234?user_token=user_12345",
                 data={
                     "guard_application_id": "test-app",
                 },
@@ -119,7 +119,7 @@ class TestAPIRequestor(object):
 
             cguard.requestor.HTTPClient.make_request.assert_called_with(
                 "post",
-                "https://api.cased.com/guard/sessions/session_1234/cancel?user_token=user_12345",
+                "https://api.cased.com/cli/sessions/session_1234/cancel?user_token=user_12345",
                 key="12345",
             )
 
@@ -135,5 +135,5 @@ class TestAPIRequestor(object):
 
             cguard.requestor.HTTPClient.make_request.assert_called_with(
                 "get",
-                "https://api.cased.com/guard/applications?user_token=abcdefg&environment=local",
+                "https://api.cased.com/cli/applications?user_token=abcdefg&environment=local",
             )
