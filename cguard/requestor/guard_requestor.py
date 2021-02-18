@@ -90,7 +90,7 @@ class GuardRequestor:
         if self.url:
             return url
         else:
-            return self._get_remote_url() + "/guard"
+            return self._get_remote_url() + "/cli"
 
     def request_access(
         self, app_name, app_token, user_token, program_args, hostname, reason=None

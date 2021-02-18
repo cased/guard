@@ -6,7 +6,7 @@ from setuptools.command.test import test as TestCommand
 
 setup(
     name="cased",
-    version="0.5.9",
+    version="0.6.0",
     description="Cased CLI adds security and visibility features to the command line tools you and your team love.",
     long_description="Cased CLI adds security and visibility features to the command line tools you and your team love. https://cased.com/guard",
     author="Cased",
@@ -20,6 +20,7 @@ setup(
     python_requires=">3.5",
     install_requires=[
         "requests",
+        "packaging",
     ],
     tests_require=[
         "responses",
