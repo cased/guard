@@ -107,6 +107,22 @@ def _get_credentials():
     return creds
 
 
+def _get_session_id():
+    filepath = cguard_dir() + "/" + "session"
+    with open(filepath, "r") as text_file:
+        session = text_file.read()
+
+    return session
+
+
+def _get_application_token():
+    filepath = cguard_dir() + "/" + "application"
+    with open(filepath, "r") as text_file:
+        app = text_file.read()
+
+    return app
+
+
 def _check_for_new_version():
     try:
         url = "https://pypi.org/pypi/cased/json"
@@ -140,6 +156,20 @@ def _setup_directories():
 
 
 #### COMMON COMMANDS ########################
+
+
+def conclude():
+    requestor = GuardRequestor()
+
+    app_token = _get_application_token()
+    session_id = _get_session_id()
+    user_token = _get_credentials()
+
+    requestor.conclude_session(
+        app_token, session_id, user_token, "data about the session"
+    )
+
+    return True
 
 
 def configure():
@@ -446,7 +476,13 @@ if len(args) == 1:
 
 command = sys.argv[1]
 
-if command == "configure":
+
+if command == "conclude":
+    conclude()
+    exit(0)
+
+
+elif command == "configure":
     if not len(args) > 2:
         configure()
         exit(0)

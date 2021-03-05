@@ -8,7 +8,7 @@ from requests import get
 
 from cguard.requestor.guard_requestor import GuardRequestor
 from cguard.core.approval import Approval
-from cguard.util import log_level, output, debug
+from cguard.util import log_level, output, debug, cguard_dir
 
 
 class Client:
@@ -37,6 +37,7 @@ class Client:
 
         if status_code == 200:
             # approved: either the session is active or auto-approval is on
+            session_id = body.get("id")
             output("Logging action to Cased audit trail.")
 
         elif status_code == 201:
@@ -82,6 +83,16 @@ class Client:
             # Session request was cancelled
             output("Session request has already been cancelled.")
             exit(0)
+
+        # write session id as latest session id
+        filepath = cguard_dir() + "/session"
+        with open(filepath, "w+") as text_file:
+            text_file.write(session_id)
+
+        # write app token as latest application id
+        filepath = cguard_dir() + "/application"
+        with open(filepath, "w+") as text_file:
+            text_file.write(app_token)
 
         # call underlying
         os.system(command)

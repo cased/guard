@@ -44,6 +44,10 @@ def environment():
     return level
 
 
+def session_id():
+    pass
+
+
 def autosync():
     settings = read_settings()
     sync = settings.get("autosync") or True
