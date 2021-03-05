@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.9
 
 WORKDIR /usr/src/app
 
@@ -14,6 +14,12 @@ RUN cd /usr/local/bin && \
     curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
+RUN \
+  apt-get update && \
+  apt-get install -y ruby && \
+  apt-get install -y ruby-dev && \
+  gem install rails
 
 RUN cased url http://host.docker.internal:3000/api
 
