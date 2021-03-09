@@ -243,7 +243,6 @@ def set_remote_url(remote_url):
 
 def sync(do_output=True):
     _confirm_credentials()
-    output("Syncing with latest Guard server configuration.")
     _check_for_new_version()
 
     user_token = _get_credentials()
