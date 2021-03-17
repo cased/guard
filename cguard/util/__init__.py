@@ -55,8 +55,8 @@ def autosync():
 
 
 def output(msg):
-    print("[guard 🔒] " + msg)
+    print("[cased 🔒] " + msg)
 
 
 def debug(msg):
-    print("[guard debug] " + msg)
+    print("[cased debug] " + msg)

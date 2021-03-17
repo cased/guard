@@ -30,7 +30,7 @@ from cguard.util import (
 )
 
 
-VERSION = "0.6.0"
+VERSION = "0.6.1"
 
 DEFAULT_URL = "https://api.cased.com"
 
@@ -273,7 +273,6 @@ def set_remote_url(remote_url):
 
 def sync(do_output=True):
     _confirm_credentials()
-    output("Syncing with latest Guard server configuration.")
     _check_for_new_version()
 
     user_token = _get_credentials()
@@ -329,8 +328,7 @@ def sync(do_output=True):
         try:
             install_program(program, app_id, deny_if_unreachable, do_output)
         except:
-            if do_output:
-                output("Failed to setup program: {}".format(program))
+            pass
 
     if apps:
         if do_output and (local_shims_count != remote_shims_count):
@@ -409,9 +407,7 @@ def install_program(program, token, deny_if_unreachable, do_output=False):
     if not shim_path:
         if do_output:
             output(
-                "[error] The given program ({}) was not found on your PATH. Please specify the path to the program.".format(
-                    program
-                )
+                "{} was not found on your PATH. Could not install shim".format(program)
             )
 
     if shims_dir() in shim_path:
