@@ -2,6 +2,7 @@ import sys
 import os
 import getpass
 import socket
+import time
 
 from requests.exceptions import Timeout
 from requests import get
@@ -59,6 +60,28 @@ class Client:
                 reason = self._prompt_for_reason()
                 self.execute(program_args, app_token, False, user_token, reason)
                 return
+            elif error == "reauthenticate":
+                requestor = GuardRequestor()
+                res = requestor.identify_user()
+                if res.status_code == 201:
+                    data = res.json()
+                    code = data.get("code")
+                    url = data.get("url")
+
+                    output(
+                        "A new integration has been added to your Cased settings that requires authorization."
+                    )
+                    output("Please re-authorize your account to continue. Just visit:")
+                    print(url)
+                    while True:
+                        # poll the API for confirmation of connection
+                        res = requestor.check_for_identification(code)
+                        if res.status_code == 200:
+                            msg = "✅ Authorized! Continuing.."
+                            output(msg)
+                            self.execute(program_args, app_token, False, user_token)
+                        else:
+                            time.sleep(2)
             else:
                 output("Request error: {}".format(error))
                 debug(str(status_code) + " " + str(body))
