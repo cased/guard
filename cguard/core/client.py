@@ -61,20 +61,20 @@ class Client:
                 self.execute(program_args, app_token, False, user_token, reason)
                 return
             elif error == "reauthenticate":
-                requestor = GuardRequestor()
-                res = requestor.identify_user()
-                if res.status_code == 201:
-                    data = res.json()
-                    code = data.get("code")
-                    url = data.get("url")
-
-                    output(
-                        "A new integration has been added to your Cased settings that requires authorization."
-                    )
+                metadata = body.get("metadata")
+                integration = body.get("reason") or "A new integration installed"
+                code = metadata.get("code")
+                url = metadata.get("url")
+                reauthentication_error = metadata.get("reauthentication_error")
+                output(
+                    integration + " " + "in your Cased settings requires authorization."
+                )
+                if url:
                     output("Please re-authorize your account to continue. Just visit:")
                     print(url)
                     while True:
                         # poll the API for confirmation of connection
+                        requestor = GuardRequestor()
                         res = requestor.check_for_identification(code)
                         if res.status_code == 200:
                             msg = "✅ Authorized! Continuing.."
@@ -82,6 +82,9 @@ class Client:
                             self.execute(program_args, app_token, False, user_token)
                         else:
                             time.sleep(2)
+                else:
+                    output("Error: {}".format(reauthentication_error))
+                    exit(1)       
             else:
                 output("Request error: {}".format(error))
                 debug(str(status_code) + " " + str(body))
