@@ -25,8 +25,8 @@ class Client:
         return socket.gethostname()
 
     def _prompt_for_reason(self):
-        output("Running under Cased Guard.")
-        reason = input("[guard 🔒] Please enter a reason for access: ")
+        output("Running under Cased.")
+        reason = input("[cased 🔒] Please enter a reason for access: ")
         return reason
 
     def _handle_response(
