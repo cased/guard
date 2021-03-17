@@ -71,7 +71,9 @@ class Client:
                     output(
                         "A new integration has been added to your Cased settings that requires authorization."
                     )
-                    output("Please re-authorize your account to continue. Just visit:")
+                    output(
+                        "Please re-authorize your account to continue. Just visit and follow the integration instructions:"
+                    )
                     print(url)
                     while True:
                         # poll the API for confirmation of connection
@@ -80,6 +82,7 @@ class Client:
                             msg = "✅ Authorized! Continuing.."
                             output(msg)
                             self.execute(program_args, app_token, False, user_token)
+                            return
                         else:
                             time.sleep(2)
             else:
