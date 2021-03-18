@@ -6,7 +6,8 @@ import time
 import random
 import subprocess
 from subprocess import PIPE, STDOUT
-import subprocess_tee
+import subprocess
+
 
 from requests.exceptions import Timeout
 from requests import get
@@ -92,7 +93,7 @@ class Client:
             else:
                 output("Request error: {}".format(error))
                 debug(str(status_code) + " " + str(body))
-                exit(1)
+                sys.exit(1)
 
         elif status_code == 401:
             # Unauthorized
@@ -101,59 +102,56 @@ class Client:
 
             if log_level() == "debug":
                 debug(str(status_code) + " " + str(body))
-            exit(0)
+            sys.exit(0)
 
         elif status_code == 404:
             # App not found
             output(str(status_code) + " " + str(body))
-            exit(0)
+            sys.exit(0)
 
         elif status_code == 410:
             # Session request was cancelled
             output("Session request has already been cancelled.")
-            exit(0)
+            sys.exit(0)
+
+        cmd = command.split(" ")
 
         # check if we should record the session
         application_settings = body.get("guard_application").get("settings")
         should_record = application_settings.get("record_output", False)
 
-        import sys
-        from subprocess import Popen, PIPE, STDOUT
+        should_record = True
 
-        cmd = command.split(" ")
+        if should_record:
+            _num = str(random.getrandbits(128))
+            num = _num
+            log_filename = "logfile-" + num
 
-        num = str(random.getrandbits(128))
-        log_filename = "logfile-" + num
+            with subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            ) as res, open(log_filename, "bw") as logfile:
+                while True:
+                    byte = res.stdout.read(1)
+                    if byte:
+                        sys.stdout.buffer.write(byte)
+                        sys.stdout.flush()
+                        logfile.write(byte)
+                    else:
+                        break
 
-        with subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        ) as proc, open(log_filename, "bw") as logfile:
-            while True:
-                byte = proc.stdout.read(1)
-                if byte:
-                    sys.stdout.buffer.write(byte)
-                    sys.stdout.flush()
-                    logfile.write(byte)
-                else:
-                    break
+            session_id = body.get("id")
 
-        session_id = body.get("id")
+            with open(log_filename, "r") as file:
+                recording = file.read()
 
-        # else:
-        #    res = subprocess.run(command)
-
-        with open(log_filename, "r") as file:
-            recording = file.read()
-
-        if os.path.exists(log_filename):
             os.remove(log_filename)
+
+            requestor = GuardRequestor()
+            requestor.record_session(session_id, app_token, user_token, recording)
         else:
-            pass
+            res = subprocess.run(cmd)
 
-        requestor = GuardRequestor()
-        resp = requestor.record_session(session_id, app_token, user_token, recording)
-
-        exit(proc.returncode)
+        return res.returncode
 
     def execute(
         self, program_args, app_token, deny_if_unreachable, user_token, reason=None
@@ -177,7 +175,7 @@ class Client:
         except Timeout as e:
             if deny_if_unreachable == "1":
                 output("Request timed-out. Per configuration, denying the request.")
-                exit(0)
+                sys.exit(0)
             else:
                 output("Request timed-out. Per configuration, allowing the request.")
                 os.system(command)
@@ -185,7 +183,7 @@ class Client:
         if log_level() == "debug":
             debug(res.text)
 
-        self._handle_response(
+        retval = self._handle_response(
             res,
             command,
             app_name,
@@ -193,3 +191,5 @@ class Client:
             app_token,
             user_token,
         )
+
+        return retval
