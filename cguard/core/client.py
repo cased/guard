@@ -192,4 +192,9 @@ class Client:
             user_token,
         )
 
+        # run error hooks
+        if retval != 0:
+            # run registered error hooks
+            pass
+
         return retval
