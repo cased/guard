@@ -3,6 +3,10 @@ import os
 import getpass
 import socket
 import time
+import random
+import subprocess
+from subprocess import PIPE, STDOUT
+import subprocess_tee
 
 from requests.exceptions import Timeout
 from requests import get
@@ -109,8 +113,47 @@ class Client:
             output("Session request has already been cancelled.")
             exit(0)
 
-        # call underlying
-        os.system(command)
+        # check if we should record the session
+        application_settings = body.get("guard_application").get("settings")
+        should_record = application_settings.get("record_output", False)
+
+        import sys
+        from subprocess import Popen, PIPE, STDOUT
+
+        cmd = command.split(" ")
+
+        num = str(random.getrandbits(128))
+        log_filename = "logfile-" + num
+
+        with subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        ) as proc, open(log_filename, "bw") as logfile:
+            while True:
+                byte = proc.stdout.read(1)
+                if byte:
+                    sys.stdout.buffer.write(byte)
+                    sys.stdout.flush()
+                    logfile.write(byte)
+                else:
+                    break
+
+        session_id = body.get("id")
+
+        # else:
+        #    res = subprocess.run(command)
+
+        with open(log_filename, "r") as file:
+            recording = file.read()
+
+        if os.path.exists(log_filename):
+            os.remove(log_filename)
+        else:
+            pass
+
+        requestor = GuardRequestor()
+        resp = requestor.record_session(session_id, app_token, user_token, recording)
+
+        exit(proc.returncode)
 
     def execute(
         self, program_args, app_token, deny_if_unreachable, user_token, reason=None
