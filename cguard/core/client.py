@@ -3,6 +3,7 @@ import os
 import getpass
 import socket
 import time
+import subprocess
 
 from requests.exceptions import Timeout
 from requests import get
@@ -88,7 +89,7 @@ class Client:
             else:
                 output("Request error: {}".format(error))
                 debug(str(status_code) + " " + str(body))
-                exit(1)
+                sys.exit(1)
 
         elif status_code == 401:
             # Unauthorized
@@ -97,20 +98,22 @@ class Client:
 
             if log_level() == "debug":
                 debug(str(status_code) + " " + str(body))
-            exit(0)
+            sys.exit(0)
 
         elif status_code == 404:
             # App not found
             output(str(status_code) + " " + str(body))
-            exit(0)
+            sys.exit(0)
 
         elif status_code == 410:
             # Session request was cancelled
             output("Session request has already been cancelled.")
-            exit(0)
+            sys.exit(0)
 
         # call underlying
-        os.system(command)
+        cmd = command.split(" ")
+        res = subprocess.run(cmd)
+        return res.returncode
 
     def execute(
         self, program_args, app_token, deny_if_unreachable, user_token, reason=None
@@ -134,7 +137,7 @@ class Client:
         except Timeout as e:
             if deny_if_unreachable == "1":
                 output("Request timed-out. Per configuration, denying the request.")
-                exit(0)
+                sys.exit(0)
             else:
                 output("Request timed-out. Per configuration, allowing the request.")
                 os.system(command)
@@ -142,7 +145,7 @@ class Client:
         if log_level() == "debug":
             debug(res.text)
 
-        self._handle_response(
+        retval = self._handle_response(
             res,
             command,
             app_name,
@@ -150,3 +153,5 @@ class Client:
             app_token,
             user_token,
         )
+
+        return retval
