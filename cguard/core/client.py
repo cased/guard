@@ -1,5 +1,6 @@
 import sys
 import os
+import io
 import getpass
 import socket
 import time
@@ -120,16 +121,10 @@ class Client:
         application_settings = body.get("guard_application").get("settings")
         should_record = application_settings.get("record_output", False)
 
-        should_record = True
-
         if should_record:
-            _num = str(random.getrandbits(128))
-            num = _num
-            log_filename = "logfile-" + num
-
             with subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            ) as res, open(log_filename, "bw") as logfile:
+            ) as res, io.BytesIO() as logfile:
                 while True:
                     byte = res.stdout.read(1)
                     if byte:
@@ -139,15 +134,13 @@ class Client:
                     else:
                         break
 
-            session_id = body.get("id")
+                logfile.seek(0)
+                recording = logfile.read().decode("utf-8")
 
-            with open(log_filename, "r") as file:
-                recording = file.read()
+                session_id = body.get("id")
 
-            os.remove(log_filename)
-
-            requestor = GuardRequestor()
-            requestor.record_session(session_id, app_token, user_token, recording)
+                requestor = GuardRequestor()
+                requestor.record_session(session_id, app_token, user_token, recording)
         else:
             res = subprocess.run(cmd)
 
