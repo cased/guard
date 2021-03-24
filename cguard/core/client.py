@@ -110,6 +110,11 @@ class Client:
             output(str(status_code) + " " + str(body))
             sys.exit(0)
 
+        elif status_code == 408:
+            # Session request was timed out
+            output("Session request has already timed out. Please request a new one.")
+            sys.exit(0)
+
         elif status_code == 410:
             # Session request was cancelled
             output("Session request has already been cancelled.")

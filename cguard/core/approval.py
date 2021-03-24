@@ -41,6 +41,10 @@ class Approval:
                 msg = "🛑 ACCESS DENIED"
                 output(msg)
                 exit(1)
+            elif state == "timed_out":
+                msg = "🛑 TIME OUT"
+                output(msg)
+                exit(1)
 
             interval = poll_interval()
             time.sleep(interval)
