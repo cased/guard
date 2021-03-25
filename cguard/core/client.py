@@ -15,7 +15,7 @@ from requests import get
 
 from cguard.requestor.guard_requestor import GuardRequestor
 from cguard.core.approval import Approval
-from cguard.util import log_level, output, debug
+from cguard.util import log_level, output, debug, recording_enabled
 
 
 class Client:
@@ -126,7 +126,8 @@ class Client:
         application_settings = body.get("guard_application").get("settings")
         should_record = application_settings.get("record_output", False)
 
-        if should_record:
+        if should_record and recording_enabled():
+            output("Recording command output per configuration.")
             with subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             ) as res, io.BytesIO() as logfile:
