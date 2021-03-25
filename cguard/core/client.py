@@ -140,7 +140,7 @@ class Client:
                         break
 
                 logfile.seek(0)
-                recording = logfile.read().decode("utf-8")
+                recording = logfile.read().decode("utf-8").replace("\n", "\r\n")
 
                 session_id = body.get("id")
 
