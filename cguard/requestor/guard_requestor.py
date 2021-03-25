@@ -123,6 +123,16 @@ class GuardRequestor:
         res = self.client.make_request("post", url, key=app_token)
         return res
 
+    def record_session(self, session_id, app_token, user_token, recording):
+        url = self._base_url() + "/sessions/{}/record?user_token={}".format(
+            session_id, user_token
+        )
+
+        res = self.client.make_request(
+            "put", url, data={"recording": recording}, key=app_token
+        )
+        return res
+
     def get_applications(self, user_token, environment):
         url = self._base_url() + "/applications?user_token={}&environment={}".format(
             user_token, environment

@@ -1,16 +1,21 @@
 import sys
 import os
+import io
 import getpass
 import socket
 import time
+import random
 import subprocess
+from subprocess import PIPE, STDOUT
+import subprocess
+
 
 from requests.exceptions import Timeout
 from requests import get
 
 from cguard.requestor.guard_requestor import GuardRequestor
 from cguard.core.approval import Approval
-from cguard.util import log_level, output, debug
+from cguard.util import log_level, output, debug, recording_enabled
 
 
 class Client:
@@ -115,9 +120,36 @@ class Client:
             output("Session request has already been cancelled.")
             sys.exit(0)
 
-        # call underlying
         cmd = command.split(" ")
-        res = subprocess.run(cmd)
+
+        # check if we should record the session
+        application_settings = body.get("guard_application").get("settings")
+        should_record = application_settings.get("record_output", False)
+
+        if should_record and recording_enabled():
+            output("Recording command output per configuration.")
+            with subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            ) as res, io.BytesIO() as logfile:
+                while True:
+                    byte = res.stdout.read(1)
+                    if byte:
+                        sys.stdout.buffer.write(byte)
+                        sys.stdout.flush()
+                        logfile.write(byte)
+                    else:
+                        break
+
+                logfile.seek(0)
+                recording = logfile.read().decode("utf-8").replace("\n", "\r\n")
+
+                session_id = body.get("id")
+
+                requestor = GuardRequestor()
+                requestor.record_session(session_id, app_token, user_token, recording)
+        else:
+            res = subprocess.run(cmd)
+
         return res.returncode
 
     def execute(

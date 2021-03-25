@@ -1,4 +1,5 @@
 from os.path import expanduser
+import os
 
 import json
 
@@ -56,3 +57,11 @@ def output(msg):
 
 def debug(msg):
     print("[cased debug] " + msg)
+
+
+def recording_enabled():
+    state = os.getenv("CASED_RECORDING_ENABLED", False)
+    if state == "1":
+        return True
+    else:
+        return False
