@@ -5,6 +5,7 @@ import getpass
 import socket
 import time
 import random
+import signal
 import subprocess
 from subprocess import PIPE, STDOUT
 import subprocess
@@ -33,6 +34,13 @@ class Client:
 
     def _prompt_for_reason(self):
         output("Running under Cased.")
+
+        def signal_handler(sig, frame):
+            print("\n[cased 🔒] Exited.")
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, signal_handler)
+
         reason = input("[cased 🔒] Please enter a reason for access: ")
         return reason
 

@@ -19,7 +19,7 @@ class Approval:
         self, app_name, app_token, session_id, user_token, waiting_message
     ):
         def signal_handler(sig, frame):
-            print("\nExiting and cancelling request: {}\n".format(session_id))
+            output("\nExiting and cancelling request: {}\n".format(session_id))
             requestor = GuardRequestor()
             requestor.cancel_session(app_token, session_id, user_token)
             sys.exit(0)
