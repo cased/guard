@@ -93,14 +93,26 @@ class GuardRequestor:
             return self._get_remote_url() + "/cli"
 
     def request_access(
-        self, app_name, app_token, user_token, program_args, hostname, reason=None
+        self,
+        app_name,
+        app_token,
+        user_token,
+        program_args,
+        hostname,
+        directory=None,
+        reason=None,
     ):
         url = self._base_url() + "/sessions?user_token={}".format(user_token)
+
+        metadata = {"hostname": hostname}
+        if directory:
+            metadata["directory"] = directory
+
         data = {
             "guard_application_id": app_name,
             "command": program_args,
             "reason": reason,
-            "metadata": {"hostname": hostname},
+            "metadata": metadata,
         }
 
         res = self.client.make_request("post", url, data=data, key=app_token)
