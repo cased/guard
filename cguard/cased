@@ -42,8 +42,8 @@ Load cased automatically by appending the following to your ~/.bashrc or ~/.zshr
 
 Common commands:
     configure [<user credentials>]                   Configure cased with user credentials. Run without an arg for web connect.
-    sync                                             Sync all shims and settings with remote Cased Guard config
-    update                                           Update the Cased Guard client with the latest version
+    sync                                             Sync all shims and settings with remote Cased config
+    update                                           Update the Cased client with the latest version
     url [<remote url>]                               Get/set the remote url for the Cased server (default: http://localhost:3000)
     verify                                           Run diagnostics on cased, confirming things are setup correctly
     version                                          Output the cased version
@@ -117,7 +117,7 @@ def _check_for_new_version():
 
         if version.parse(latest_version) > version.parse(VERSION):
             output(
-                "There is a newer version of Cased Guard available. Please update your client by running: `cased update`"
+                "There is a newer version of the Cased client available. Please update your client by running: `cased update`"
             )
         else:
             pass
@@ -304,7 +304,7 @@ def sync(do_output=True):
         if do_output and (local_shims_count != remote_shims_count):
             output("New shims installed and updated.")
     else:
-        output("No guarded applications are configured on the Cased Guard server.")
+        output("No guarded applications are configured on the Cased server.")
 
 
 def update():
@@ -314,10 +314,10 @@ def update():
 
     if status != 0:
         print(
-            "Cased Guard failed to update automatically with Homebrew. Please update manually."
+            "Cased client failed to update automatically with Homebrew. Please update manually."
         )
     else:
-        print("Cased Guard has been updated.")
+        print("The Cased client has been updated.")
 
 
 def verify():
@@ -385,7 +385,7 @@ def install_program(program, token, deny_if_unreachable, do_output=False):
             "Shim already exists."
         )  # todo: we can overwrite the existing, but it will require an explicit path (`which` won't work anymore since we have the shim!)
 
-    details = "Installed Cased Guard shim for {}".format(program)
+    details = "Installed Cased shim for {}".format(program)
 
     _make_shim(program, token, shim_path, deny_if_unreachable)
     if do_output:

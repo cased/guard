@@ -59,5 +59,5 @@ fi
 set -e
 
 python3 -m pip install cased==0.6.* --upgrade 2> /dev/null || python -m pip install cased==0.6.* --upgrade 1> /dev/null
-success "Success: Cased Guard is installed. Run \`cased configure <your-user-token>\` if this is your first install."
+success "Success: Cased client is installed. Run \`cased configure <your-user-token>\` if this is your first install."
 success "Check https://docs.cased.com/docs/getting-started-with-guard for more."

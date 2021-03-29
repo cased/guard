@@ -106,7 +106,7 @@ class Client:
 
         elif status_code == 401:
             # Unauthorized
-            output("Running under Cased Guard.")
+            output("Running under Cased.")
             output("Access denied: {}".format(body.get("message")))
 
             if log_level() == "debug":
