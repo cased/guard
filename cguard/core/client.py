@@ -175,9 +175,11 @@ class Client:
         # We wont have a session id (this is just an invocation of the program),
         # so we still need to request a new session. However, if we receive a
         # 200 (the server controls the session time) we'll be auto-approved.
+
         try:
+            cwd = os.getcwd()
             res = requestor.request_access(
-                app_name, app_token, user_token, command, hostname, reason
+                app_name, app_token, user_token, command, hostname, cwd, reason
             )
         except Timeout as e:
             if deny_if_unreachable == "1":
