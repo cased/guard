@@ -7,6 +7,8 @@ RUN ./dev-install
 
 ENV TERRAFORM_VERSION 0.12.7
 ENV PATH="/root/.cguard/shims:${PATH}"
+ENV CASED_RECORDING_ENABLED 1
+
 
 RUN mkdir -p /root/.cguard/shims
 
