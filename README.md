@@ -106,8 +106,8 @@ You can also reset the URL to use the default:
 cased url --reset
 ```
 
-Cased CLI supports experimental recording of session outout. To enable the function, set
-the `CASED_RECORDING_ENABLED` like this:
+Cased CLI supports experimental recording of session output. To enable the functionality, 
+set the `CASED_RECORDING_ENABLED` like this:
 
 ```
 export CASED_RECORDING_ENABLED=1
