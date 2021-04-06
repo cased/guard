@@ -314,7 +314,7 @@ def update():
 
     if status != 0:
         print(
-            "Cased client failed to update automatically with Homebrew. Please update manually."
+            "Cased client failed to update automatically with Homebrew. You may need to run: `brew link --overwrite cased` to force the update. You can also update manually."
         )
     else:
         print("The Cased client has been updated.")
