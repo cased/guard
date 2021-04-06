@@ -65,3 +65,15 @@ def recording_enabled():
         return True
     else:
         return False
+
+
+def get_program_from_git_config(repo, origin):
+    sections = repo.config_reader().sections()
+    header = 'remote "{}"'.format(origin)
+
+    if header in sections:
+        url = repo.config_reader().get_value(header, "url")
+        result = url.split("/")[-1].replace(".git", "")
+        return result
+    else:
+        raise Exception("No origin found.")

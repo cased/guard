@@ -51,6 +51,33 @@ class TestAPIRequestor(object):
                 key="12345",
             )
 
+    def test_request_access_is_called_correctly_for_heroku_app(self):
+        requestor = GuardRequestor()
+
+        with mock_response():
+            assert requestor.request_access(
+                "heroku",
+                app_token,
+                user_token,
+                program_args,
+                hostname="hostname",
+            )
+
+            cguard.requestor.HTTPClient.make_request.assert_called_with(
+                "post",
+                "https://api.cased.com/cli/sessions?user_token=abcdefg",
+                data={
+                    "guard_application_id": "heroku",
+                    "metadata": {
+                        "hostname": "hostname",
+                        "heroku_application": "unknown",
+                    },
+                    "command": "run",
+                    "reason": None,
+                },
+                key="12345",
+            )
+
     def test_request_access_is_called_correctly_with_reason(self):
         requestor = GuardRequestor()
 

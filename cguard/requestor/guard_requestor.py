@@ -2,8 +2,15 @@ import requests
 from os.path import expanduser, exists
 import shutil
 import hashlib
+from git import Repo
 
-from cguard.util import home_dir, cguard_dir, log_level
+from cguard.util import (
+    home_dir,
+    cguard_dir,
+    log_level,
+    output,
+    get_program_from_git_config,
+)
 
 DEFAULT_URL = "https://api.cased.com"
 
@@ -107,6 +114,53 @@ class GuardRequestor:
         metadata = {"hostname": hostname}
         if directory:
             metadata["directory"] = directory
+
+        # Special heroku metadata (todo: add as a generic plugin system). We try to get the
+        # data through all options; if we fail, we still proceed with the operation.
+        if app_name == "heroku":
+            try:
+                program = None
+                repo = Repo(directory)
+
+                arg_arr = program_args.split()
+
+                # Check the program args to see if any details were given specifically
+                target_commands = ["--app", "-a", "--remote", "-r"]
+                if any(x in target_commands for x in arg_arr):
+
+                    if "--app" in arg_arr:
+                        target = "--app"
+                    elif "-a" in arg_arr:
+                        target = "-a"
+                    elif "--remote" in arg_arr:
+                        target = "--remote"
+                    elif "-r" in arg_arr:
+                        target = "-r"
+
+                    target_index = arg_arr.index(target)
+                    index = target_index + 1
+
+                    if target == "-a" or target == "--app":
+                        # use the app name
+                        result = arg_arr[index]
+                    elif target == "-r" or target == "--remote":
+                        # remote was given, so look at the git config and get
+                        # the app name from the specific remote
+                        result = get_program_from_git_config(repo, arg_arr[index])
+
+                else:
+                    # Program was not specified in any way, so get the name from
+                    # the default remote
+                    try:
+                        result = get_program_from_git_config(repo, "heroku")
+                    except:
+                        result = "unknown"
+
+                if result:
+                    metadata["heroku_application"] = result
+
+            except Exception as e:
+                output("Error sending heroku metadata: {}".format(e))
 
         data = {
             "guard_application_id": app_name,

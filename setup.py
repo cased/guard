@@ -18,10 +18,7 @@ setup(
     zip_safe=False,
     scripts=["cased-init", "cguard/cased"],
     python_requires=">3.5",
-    install_requires=[
-        "requests",
-        "packaging",
-    ],
+    install_requires=["requests", "packaging", "GitPython"],
     tests_require=[
         "responses",
         "mock",
