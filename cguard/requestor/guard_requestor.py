@@ -156,13 +156,17 @@ class GuardRequestor:
         if directory:
             metadata["directory"] = directory
 
+        cased_metadata = {}
+
         # Special heroku metadata (todo: add as a generic plugin system). We try to get the
         # data through all options; if we fail, we still proceed with the operation.
         if app_name == "heroku":
             try:
                 result = self._get_heroku_metadata(directory, program_args)
-                if result:
-                    metadata["heroku_application"] = result
+                heroku_app_name = result
+                if heroku_app_name:
+                    metadata["heroku_application"] = heroku_app_name
+                    cased_metadata["heroku_application"] = heroku_app_name
 
             except Exception as e:
                 output("Error getting heroku metadata: {}".format(e))
@@ -172,6 +176,7 @@ class GuardRequestor:
             "command": program_args,
             "reason": reason,
             "metadata": metadata,
+            "cased_metadata": cased_metadata,
         }
 
         res = self.client.make_request("post", url, data=data, key=app_token)

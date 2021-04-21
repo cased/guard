@@ -48,6 +48,10 @@ class Client:
         self, res, command, app_name, program_args, app_token, user_token
     ):
         status_code = res.status_code
+        if status_code == 204:
+            # ignored: no cased request required
+            return
+
         body = res.json()
 
         if status_code == 200:

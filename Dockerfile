@@ -9,13 +9,14 @@ ENV TERRAFORM_VERSION 0.12.7
 ENV PATH="/root/.cguard/shims:${PATH}"
 ENV CASED_RECORDING_ENABLED 1
 
-
 RUN mkdir -p /root/.cguard/shims
 
 RUN cd /usr/local/bin && \
     curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
+RUN curl https://cli-assets.heroku.com/install.sh | sh
 
 RUN \
   apt-get update && \
