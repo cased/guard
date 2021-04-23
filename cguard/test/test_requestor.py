@@ -45,6 +45,7 @@ class TestAPIRequestor(object):
                 data={
                     "guard_application_id": "test-app",
                     "metadata": {"hostname": "hostname"},
+                    "cased_metadata": {},
                     "command": "run",
                     "reason": None,
                 },
@@ -70,6 +71,9 @@ class TestAPIRequestor(object):
                     "guard_application_id": "heroku",
                     "metadata": {
                         "hostname": "hostname",
+                        "heroku_application": "unknown",
+                    },
+                    "cased_metadata": {
                         "heroku_application": "unknown",
                     },
                     "command": "run",
@@ -99,6 +103,7 @@ class TestAPIRequestor(object):
                     "metadata": {
                         "hostname": "hostname",
                     },
+                    "cased_metadata": {},
                     "command": "run",
                     "reason": "reason for access",
                 },
@@ -128,6 +133,7 @@ class TestAPIRequestor(object):
                         "hostname": "hostname",
                         "directory": "/Users/test/terraform",
                     },
+                    "cased_metadata": {},
                     "command": "run",
                     "reason": "reason for access",
                 },
